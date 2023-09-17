@@ -1,0 +1,15 @@
+__pycache__/
+*.cover
+*.py[cod]
+*$py.class
+README.md
+venv
+poetry.lock
+.vscode
+.idea/
+tests/
+testing/
+.pytest_cache/
+.github
+LICENSE
+Dockerfile

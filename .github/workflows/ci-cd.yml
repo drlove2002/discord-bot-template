@@ -1,0 +1,85 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - 'v*'
+  pull_request:
+    types: [opened, reopened]
+    branches:
+      - main
+
+jobs:
+  test:
+    if: github.ref_name == 'main' || contains(github.event.head_commit.message, '[run-test]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - name: Set up Python 3.11
+        uses: actions/setup-python@main
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest pytest-asyncio pytest-aiohttp
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Test with pytest
+        run: |
+          pytest
+
+  build:
+    if: github.event_name == 'push' && github.ref_name == 'main' && !contains(github.event.head_commit.message, 'python-semantic-release')
+    needs: test
+    runs-on: ubuntu-latest
+    concurrency:
+      group: build
+      cancel-in-progress: true
+
+    steps:
+      - name: Deploy to cloud 🚀
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            git -C /home/${{ secrets.SSH_USER }}/bot pull origin main
+            sudo docker builder build /home/${{ secrets.SSH_USER }}/bot/ --tag bot:latest
+            sudo docker kill --signal="SIGTERM" bot
+            sleep 2
+            sudo docker rm bot -f
+            sudo docker run --restart unless-stopped -d -it --name bot --net=host --env-file ~/.env bot:latest
+            sudo docker rmi -f $(sudo docker images -f "dangling=true" -q)
+
+  release:
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    needs: test
+    runs-on: ubuntu-latest
+    concurrency: release
+
+    steps:
+      - uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Python Semantic Release
+        run: |
+          pip install python-semantic-release==7.34.6
+          git config --global user.name "github-actions"
+          git config --global user.email "action@github.com"
+          semantic-release publish -D commit_author="sudip-roy <sudiproy20yo@gmail.com>"
+        env:
+          GH_TOKEN: ${{secrets.GH_TOKEN}}
