@@ -17,7 +17,6 @@ class MessageHandler(Cog):
     def __init__(self, bot: MainBot):
         self._bot = bot
         self.db = bot.db
-        self.guild = bot.guild
         self.cache = bot.cache
 
     @Cog.listener()

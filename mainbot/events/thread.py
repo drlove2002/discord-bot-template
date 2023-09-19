@@ -18,7 +18,6 @@ class ThreadHandler(Cog):
 
     def __init__(self, bot: MainBot):
         self.bot = bot
-        self.guild = bot.guild
 
     @Cog.listener()
     async def on_thread_create(self, thread: Thread):

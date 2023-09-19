@@ -20,7 +20,6 @@ class MemberHandler(Cog):
     def __init__(self, bot: MainBot):
         self.bot = bot
         self.db = bot.db
-        self.guild = bot.guild
 
     @Cog.listener()
     async def on_member_join(self, member: Member):
