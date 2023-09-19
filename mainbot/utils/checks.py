@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING
 from discord import DiscordException, DMChannel, Message, Thread
 from discord.ext.commands import check
 
-from ..core.constants import COMMAND_CATEGORIES
 from .util import Raise
 
 if TYPE_CHECKING:
@@ -134,7 +133,7 @@ def vc_leave(b: VoiceState, a: VoiceState) -> bool:
 async def in_command_channel(ctx: Context, *, in_thread: bool = False) -> bool:
     if in_thread and isinstance(ctx.channel, Thread):
         return True
-    if ctx.channel.category_id in COMMAND_CATEGORIES:
+    if ctx.channel == ctx.cache.channel.command:
         return True
     if is_invoked_with_command(ctx):
         await Raise(

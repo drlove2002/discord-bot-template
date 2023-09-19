@@ -13,7 +13,6 @@ from discord import __version__ as dpy_v
 from discord.ext.commands import BucketType, Cog, bot_has_permissions, command, cooldown
 
 from mainbot.core import Context
-from mainbot.core.constants import COMMAND_CATEGORIES
 from mainbot.core.paginator import Paginator
 from mainbot.utils import checks, close, get_logger, restart
 from mainbot.utils.util import clean_code
@@ -86,7 +85,7 @@ class Developer(Cog):
                 """
                 ),
             ).set_thumbnail(url=ctx.bot.get_emoji(809890706784649237).url),
-            delete_after=None if ctx.channel.category_id in COMMAND_CATEGORIES else 10,
+            delete_after=None if ctx.channel == ctx.cache.channel.command else 10,
         )
 
     @command(

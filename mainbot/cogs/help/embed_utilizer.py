@@ -7,7 +7,6 @@ from discord.ext.commands import Cog, UserInputError
 from discord.utils import as_chunks
 
 from mainbot.core import Context
-from mainbot.core.constants import COMMAND_CATEGORIES, STAFF_CHANNELS
 from mainbot.core.paginator import Paginator
 from mainbot.utils import Raise
 
@@ -110,7 +109,9 @@ class EmbedHelpCommand(commands.HelpCommand):
     def get_cog_list(self) -> tuple[Embed | None, SelectCog]:
         ctx = self.context
         cog_names = ["Miscellaneous"]
-        if self.context.channel.id in STAFF_CHANNELS:
+        if self.context.channel in (
+            getattr(ctx.cache.channel, cname) for cname in ("log", "dev_chat")
+        ):
             cog_names += ["Developer"]
         cogs = (ctx.bot.get_cog(cog_name) for cog_name in cog_names)
         options = []
@@ -195,6 +196,6 @@ class EmbedHelpCommand(commands.HelpCommand):
         await self.get_destination().send(
             embed=embed,
             delete_after=None
-            if self.context.channel.category_id in COMMAND_CATEGORIES
+            if self.context.channel == self.context.cache.channel.command
             else 20,
         )

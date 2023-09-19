@@ -13,7 +13,6 @@ from discord.ext.commands import (
 )
 
 from mainbot.core import Context
-from mainbot.core.constants import COMMAND_CATEGORIES
 from mainbot.utils import Raise, humanize_time
 
 N = "on_command_error"
@@ -32,7 +31,7 @@ class ErrorHandler(Cog):
     async def concurrency_error(self, ctx: Context, error: Exception):
         if not isinstance(error, MaxConcurrencyReached):
             return
-        if error.per.name == "user":
+        if error.per.name == "user":  # type: ignore
             await Raise(
                 ctx,
                 f"You are already using `{ctx.command.name.capitalize()}` Command, wait until you finish!",
@@ -45,7 +44,7 @@ class ErrorHandler(Cog):
 
     @Cog.listener()
     async def on_command_error(self, ctx: Context, error: CommandError):
-        if ctx.channel.category_id not in COMMAND_CATEGORIES:
+        if ctx.channel == ctx.cache.channel.command:
             try:
                 await ctx.message.delete(delay=2)
             except DiscordException:

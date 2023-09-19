@@ -3,20 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from urllib.request import urlopen
 
+from discord import CategoryChannel
 from discord import Role as DiscordRole
 from discord import TextChannel
 from discord.utils import find
 
 if TYPE_CHECKING:
     from mainbot.core.bot import MainBot
-
-STAFF_CHANNELS = (
-    # TODO: Add staff channels
-)
-COMMAND_CATEGORIES = (
-    1152963983301693452,
-    # TODO: Add command category channels
-)
 
 NORMALIZE_CHARS = {
     "Š": "S",
@@ -138,9 +131,27 @@ class Channel:
     """Some import channel of servers"""
 
     def __init__(self, bot: MainBot):
-        self.dev_chat: TextChannel = bot.get_channel(
-            777131049036546080
-        )  # TODO: Change with real id
-        self.log: TextChannel = bot.get_channel(
-            797370382109376524
-        )  # TODO: Change with real id
+        self._bot = bot
+        # TODO: Edit channel names as per your server
+        self.dev_chat: TextChannel = self.from_name("♕│dev-chat")
+        self.log: TextChannel = self.from_name("📂│islam-logs")
+        self.command: TextChannel = self.from_name("🤖│bot")
+
+    def from_name(self, name: str) -> TextChannel | None:
+        return find(
+            lambda r: r.name.lower() == name.lower(), self._bot.guild().text_channels
+        )
+
+
+class Category:
+    """Some import category of servers"""
+
+    def __init__(self, bot: MainBot):
+        self._bot = bot
+        # TODO: Edit category names as per your server
+        self.staff: CategoryChannel = self.from_name("💭 | Staff Main")
+
+    def from_name(self, name: str) -> CategoryChannel | None:
+        return find(
+            lambda r: r.name.lower() == name.lower(), self._bot.guild().categories
+        )

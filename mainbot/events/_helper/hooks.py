@@ -7,7 +7,6 @@ from discord import Colour, DiscordException, Embed
 from discord.ext.commands import UserInputError
 
 from mainbot.core import Context
-from mainbot.core.constants import COMMAND_CATEGORIES
 from mainbot.utils import close, get_logger
 
 if TYPE_CHECKING:
@@ -64,7 +63,7 @@ async def setup(bot: MainBot) -> None:
 async def after_cmd_invoke(ctx: Context):
     """A function that is called after every command invocation."""
     delay = ctx.command.extras.get("delete_delay", 0)
-    if ctx.channel.category_id in COMMAND_CATEGORIES or not delay:
+    if ctx.channel == ctx.cache.channel.command or not delay:
         return
     try:
         await ctx.message.delete(delay=delay)

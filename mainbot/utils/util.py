@@ -13,7 +13,7 @@ from discord import (
 )
 from discord.ext.commands import Context
 
-from mainbot.core.constants import ALPHABETS, COMMAND_CATEGORIES, NORMALIZE_CHARS
+from mainbot.core.constants import ALPHABETS, NORMALIZE_CHARS
 
 __all__ = (
     "clean",
@@ -137,7 +137,10 @@ class Raise:
         self.msg = message
         self.view = view
         self.del_after = (
-            None if ctx.channel.category_id in COMMAND_CATEGORIES else delete_after
+            None
+            if isinstance(ctx, Context)
+            and ctx.channel in (ctx.cache.channel.command, ctx.cache.channel.log)  # type: ignore
+            else delete_after
         )
         self.edit = edit
         self.ephemeral = ephemeral
